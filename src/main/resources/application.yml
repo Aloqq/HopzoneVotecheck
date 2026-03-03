@@ -1,0 +1,48 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/hopzone_verify?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASS:root}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 20MB
+
+server:
+  forward-headers-strategy: framework
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  hopzone-token: ${HOPZONE_TOKEN:}
+  hopzone-endpoint: ${HOPZONE_ENDPOINT:https://api.hopzone.net/lineage2/vote?token={TOKEN}&ip_address={IP}}
+  recaptcha-enabled: ${RECAPTCHA_ENABLED:true}
+  recaptcha-site-key: ${RECAPTCHA_SITE_KEY:}
+  recaptcha-secret-key: ${RECAPTCHA_SECRET_KEY:}
+  storage-dir: ${STORAGE_DIR:uploads}
+  hopzone-site-url: ${HOPZONE_SITE_URL:https://www.hopzone.net}
+  hopzone-server-id: ${HOPZONE_SERVER_ID:}
+  hopzone-vote-url: ${HOPZONE_VOTE_URL:https://l2.hopzone.net/ru/site/vote/106168/1}
+  report-fail-intro: ${REPORT_FAIL_INTRO:}
+  debug-ip-override: ${DEBUG_IP_OVERRIDE:}
+  telegram-bot-token: ${TELEGRAM_BOT_TOKEN:}
+  telegram-chat-id: ${TELEGRAM_CHAT_ID:}
+  telegram-message-thread-id: ${TELEGRAM_MESSAGE_THREAD_ID:}
+
+logging:
+  level:
+    root: INFO
+    com.hopzone.voteverify: INFO

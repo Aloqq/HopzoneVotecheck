@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hopzone Vote Verify</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <script th:if="${recaptchaEnabled}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+<main class="container">
+    <h1>Hopzone Vote Verify</h1>
+    <p class="ip-display">Ваш IP: <strong id="clientIpValue" th:text="${clientIp}"></strong></p>
+    <p th:if="${debugIpOverride}" class="debug-banner">
+        ⚠️ DEBUG: IP override active. Hopzone check uses <strong th:text="${debugIpOverrideValue}"></strong> (your real IP: <span th:text="${realIp}"></span>)
+    </p>
+
+    <form id="verifyForm" class="card">
+        <label class="block">
+            Скриншот #1: окно в игре с IP
+            <input id="screenshotIp" name="screenshotIp" type="file" accept="image/png,image/jpeg,image/webp" required>
+        </label>
+        <div class="paste-zone" data-target="screenshotIp" tabindex="0">
+            Вставьте изображение (Ctrl+V) или выберите файл
+        </div>
+        <div class="preview-wrap">
+            <img id="previewScreenshotIp" class="preview hidden" alt="Screenshot #1 preview">
+            <button type="button" class="btn-clear hidden" id="clearScreenshotIp">Удалить</button>
+        </div>
+
+        <label class="block">
+            Скриншот #2: Hopzone «You voted»
+            <input id="screenshotVote" name="screenshotVote" type="file" accept="image/png,image/jpeg,image/webp" required>
+            <small class="hint"><a th:href="${hopzoneVoteUrl}" target="_blank" rel="noopener">Перейти на Hopzone</a> → проголосуйте → сделайте скриншот с «You voted»</small>
+        </label>
+        <div class="paste-zone" data-target="screenshotVote" tabindex="0">
+            Вставьте изображение (Ctrl+V) или выберите файл
+        </div>
+        <div class="preview-wrap">
+            <img id="previewScreenshotVote" class="preview hidden" alt="Screenshot #2 preview">
+            <button type="button" class="btn-clear hidden" id="clearScreenshotVote">Удалить</button>
+        </div>
+
+        <label class="block">
+            Hopzone Account ID
+            <input id="hopzoneAccountId" name="hopzoneAccountId" type="text" placeholder="Вставьте ID аккаунта" required>
+            <small class="hint">Пройдите авторизацию и зайдите на страницу <a href="https://l2.hopzone.net/ru/account" target="_blank" rel="noopener">Hopzone → Личный кабинет</a>. В разделе «Личная информация» найдите «ID аккаунта» и вставьте его в это поле.</small>
+        </label>
+
+        <label class="block">
+            Ник в игре
+            <input id="gameNickname" name="gameNickname" type="text" placeholder="Ваш ник в игре" required>
+        </label>
+        <label class="block">
+            Telegram
+            <input id="telegram" name="telegram" type="text" placeholder="@username">
+        </label>
+        <label class="block">
+            Discord
+            <input id="discord" name="discord" type="text" placeholder="username#1234">
+        </label>
+        <label class="block">
+            Email
+            <input id="email" name="email" type="email" placeholder="email@example.com">
+        </label>
+
+        <div th:if="${recaptchaEnabled}" class="g-recaptcha" th:attr="data-sitekey=${recaptchaSiteKey}"></div>
+        <button type="submit">Проверить Hopzone</button>
+    </form>
+
+    <section id="resultCard" class="card hidden">
+        <h2>Результат</h2>
+        <p><strong>voted:</strong> <span id="resultVoted"></span></p>
+        <p><strong>voteTime:</strong> <span id="resultVoteTime"></span></p>
+        <p><strong>hopzoneServerTime:</strong> <span id="resultServerTime"></span></p>
+        <p><strong>raw JSON:</strong></p>
+        <textarea id="resultRawJson" readonly rows="8"></textarea>
+
+        <div id="successBlock" class="status success hidden">
+            ✅ Вы проголосовали! Вам нужно нажать кнопку <strong>Check Reward</strong>, затем <strong>Get Reward</strong> и получить приз.
+            <p class="vote-link-block">
+                <a th:href="${hopzoneVoteUrl}" target="_blank" rel="noopener" th:text="${hopzoneVoteUrl}"></a>
+            </p>
+        </div>
+
+        <div id="failBlock" class="status fail hidden">
+            <p>Hopzone API не подтвердил голос для вашего IP.</p>
+            <p class="report-link-block">
+                <strong>Ссылка на отчёт:</strong>
+                <a id="reportLink" href="#" target="_blank" rel="noopener"></a>
+                <button id="copyReportLinkBtn" type="button" class="btn-copy">Копировать ссылку</button>
+            </p>
+        </div>
+    </section>
+</main>
+
+<footer class="app-footer">
+    <small>
+        Made with <span class="text-danger">💙</span> by <strong>Aloq</strong>
+        <a href="https://github.com/Aloqq/HopzoneVotecheck" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub Repository">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+            </svg>
+        </a>
+    </small>
+</footer>
+
+<script th:inline="javascript">
+    window.APP_BASE_URL = /*[[${baseUrl}]]*/ '';
+</script>
+<script th:src="@{/js/verify.js}"></script>
+</body>
+</html>
